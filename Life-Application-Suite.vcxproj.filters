@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{a4def784-78c8-480c-a860-f39c9492be36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{869005f3-359e-4f7f-be39-0b2a8aa84a25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libraries">
+      <UniqueIdentifier>{97a017d3-c008-4e9c-8f94-d963dc0758fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\glfw3.lib" />
+    <Library Include="lib\OpenLog.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\_MAIN.cpp" />
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\Utilities\FileSystem.cpp" />
+    <ClCompile Include="src\Modules\DebugLog.cpp" />
+    <ClCompile Include="src\Modules\Home.cpp" />
+    <ClCompile Include="src\Modules\Module.cpp" />
+    <ClCompile Include="src\Modules\Settings.cpp" />
+    <ClCompile Include="src\Modules\Vehicle.cpp" />
+    <ClCompile Include="src\glad.c" />
+    <ClCompile Include="src\ImGui\imgui.cpp" />
+    <ClCompile Include="src\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="src\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\ImGui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\ImGui\imgui_mods.cpp" />
+    <ClCompile Include="src\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="src\ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Log Target\LogManager.cpp" />
+    <ClCompile Include="src\Utilities\DateTime.cpp" />
+    <ClCompile Include="src\Utilities\Utilities.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\Utilities\FileSystem.h" />
+    <ClInclude Include="src\Modules\DebugLog.h" />
+    <ClInclude Include="src\Modules\Home.h" />
+    <ClInclude Include="src\Modules\Module.h" />
+    <ClInclude Include="src\Modules\Vehicle.h" />
+    <ClInclude Include="src\Modules\WorkoutProgressTracker.h" />
+    <ClInclude Include="include\GLFW\glfw3.h" />
+    <ClInclude Include="include\GLFW\glfw3native.h" />
+    <ClInclude Include="include\glad\glad.h" />
+    <ClInclude Include="include\DearImGUI\imconfig.h" />
+    <ClInclude Include="include\DearImGUI\imgui.h" />
+    <ClInclude Include="include\DearImGUI\imgui_impl_glfw.h" />
+    <ClInclude Include="include\DearImGUI\imgui_impl_opengl3.h" />
+    <ClInclude Include="include\DearImGUI\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="include\DearImGUI\imgui_internal.h" />
+    <ClInclude Include="include\DearImGUI\imgui_mods.h" />
+    <ClInclude Include="include\DearImGUI\imstb_rectpack.h" />
+    <ClInclude Include="include\DearImGUI\imstb_textedit.h" />
+    <ClInclude Include="include\DearImGUI\imstb_truetype.h" />
+    <ClInclude Include="include\KHR\khrplatform.h" />
+    <ClInclude Include="include\OpenLog.h" />
+    <ClInclude Include="src\Log Target\LogManager.h" />
+    <ClInclude Include="src\Modules\Settings.h" />
+    <ClInclude Include="src\Utilities\DateTime.h" />
+    <ClInclude Include="src\Utilities\Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Modules\imgui.ini" />
+  </ItemGroup>
+</Project>
