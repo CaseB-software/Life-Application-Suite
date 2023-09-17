@@ -11,6 +11,8 @@ Application::~Application() {
 
 }
 
+const std::string Application::LAS_TAG{ "LAS" };
+
 // Needed for GLFW Setup
 static void glfw_error_callback(int error, const char* description)
 {
@@ -25,6 +27,10 @@ void Application::init() {
 	OpenLog::Tag las{ LAS_TAG };
 	OpenLog::registerTag(las);
 	OpenLog::changeSettings(OpenLog::TIME_OFFSET, -7);
+	OpenLog::changeSettings(OpenLog::SHOW_LOCATION, false);
+
+	OpenLog::registerLogTarget(std::make_unique<LogManager>(m_LM));
+	OpenLog::addActiveLogTarget(m_LM.str());
 
 	if (!m_initialized) {
 		// Ensure all proper subsystems are initialized
@@ -32,9 +38,7 @@ void Application::init() {
 
 			m_LM.setParentDirectory(LOG_DIRECTORY.string());
 			if (m_LM.createLogFile()) {
-				OpenLog::registerLogTarget(std::make_unique<LogManager>(m_LM));
-				OpenLog::addActiveLogTarget(m_LM.str());
-				
+				OpenLog::log("Created log file", LAS_TAG);
 			}
 
 			OpenLog::log("Application file system was setup successfully", LAS_TAG);
@@ -115,9 +119,7 @@ void Application::run()
 	return;
 }
 
-void Application::registerModule(Module& module) { 
-	m_registeredModules.try_emplace(module.printName(), std::make_unique<Module>(module)); 
-}
+
 Module* Application::getModule(const std::string name) const {
 	if (m_registeredModules.contains(name)) {
 		return m_registeredModules.at(name).get();
@@ -147,14 +149,15 @@ bool Application::SetupFileSystem(){
 	AssignPaths(getExeParentPath());
 	
 	// Checks if member variable directories exist yet. If they do not exist, start first time setup
-	if (!FileSystem::doesFileExist(printModuleDirectory()))
+	if (!utl::fs::doesFileExist(printModuleDirectory()))
 	{
 		AssignPaths(FirstTimeSetup(printParentDirectory()));
+		utl::fs::createDirectory(MODULE_DIRECTORY.string());
 	}		
 	
 
 	// Creates directories for the files if the files did exist/first time setup complete
-	if (!FileSystem::createDirectory(printParentDirectory()) || !FileSystem::createDirectory(printLogDirectory()))
+	if (!utl::fs::createDirectory(printParentDirectory()) || !utl::fs::createDirectory(printLogDirectory()) )
 	{
 		OpenLog::log("Could not initialize the file system.", LAS_TAG);
 		success = false;
@@ -240,28 +243,28 @@ bool Application::SetupImGUI(){
 }
 bool Application::SetupModules(){
 
-	Debug 			debugManager	{};
 	VehicleManager 	vehicleManager 	{};
+	vehicleManager.setDirectory(MODULE_DIRECTORY.string());
 
 	// The order of calling AddModule() will determine the order they are in the menu bar
 	registerModule(vehicleManager);
-	registerModule(debugManager);
 
 	// If there are no modules, exit
 	if(m_registeredModules.empty())
 	{
-		std::cerr << "There are no Modules for this application" << std::endl;
+		OpenLog::Log("There are no Modules for this application", LAS_TAG);
 		return false;
 	}
 
 	// Iterate through the module list and run the setup function
-	for(auto& module : m_registeredModules){
-		if(!module.second->init()){
-			std::string msg{"Could not setup [" + module.second->printName() + "] and did not add to Module list"};
+	for(auto& pair : m_registeredModules){
+		Module* module{ pair.second.get()};
+		if(!module->init()){
+			std::string msg{"Could not setup [" + module->printName() + "]. It was not added to the active module list"};
 			OpenLog::log(msg, LAS_TAG);
 		}
 		else { 
-			OpenLog::log( "Successfully initialized Module " + module.second->printName(), LAS_TAG);
+			OpenLog::log( "Successfully initialized Module " + module->printName(), LAS_TAG);
 		}
 	}
 
@@ -275,7 +278,7 @@ std::string Application::getExeParentPath() const {
 	std::filesystem::path pathBuffer{};
 
 #ifdef _WIN32
-	std::cerr << "Windows OS was detected" << std::endl;
+	OpenLog::log("Windows OS was detected", LAS_TAG);
 	
 	#ifdef _DEBUG
 		pathBuffer = "C:\\dev\\1. Project Development Files\\LAS\\";
@@ -325,7 +328,7 @@ void Application::AssignPaths(const std::string parentPath){
 }
 
 std::string FirstTimeSetup(std::string oldDirectory) {
-	std::cerr << "Necessary directories were not found. Performing first time setup." << std::endl;
+	OpenLog::log("Performing first time setup.", Application::LAS_TAG);
 
 	std::string desiredDirectoryBuffer{};
 
@@ -359,7 +362,7 @@ std::string FirstTimeSetup(std::string oldDirectory) {
 				std::cout << "\n  Note: As of v0.2.0-WIP, the .exe needs to be in the same parent directory.\n  The folder containing the .exe will also contain the files\n>";
 				std::getline(std::cin, desiredDirectoryBuffer);
 
-				Utilities::ensureBackslash(desiredDirectoryBuffer);
+				utl::txt::ensureBackslash(desiredDirectoryBuffer);
 
 				std::cout << "\nDesired directory >\n" << desiredDirectoryBuffer << "\n\n";
 				std::cout << "Are you sure this is correct? (y/n)\n";

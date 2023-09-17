@@ -1,8 +1,9 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-#include "../Utilities/FileSystem.h"
-#include "../Utilities/Utilities.h"
+#include "Utilities/UTL_Files.h"
+#include "Utilities/UTL_Text.h"
+#include "OpenLog/OpenLog.h"
 
 
 #include <string>
@@ -22,7 +23,9 @@ public:
     const std::string printName()  const   { return m_name;    }
     const bool        isShown()    const   { return m_shown;   }
 
-    std::string printDirectory()   const   { return m_directory.string(); }
+    bool setDirectory(const std::string& parentPath);
+    std::string printDirectory()        const  { return m_directory.string(); }
+
     bool doesDirectoryExist(std::string parentDirectory);
 
     virtual bool performFirstTimeSetup();
@@ -34,11 +37,12 @@ public:
 
 protected:
     std::string m_name;             // Defines the name of the module to be used
+    std::string m_moduleTag;
 
     std::filesystem::path m_directory{};
 
 private:
-
+   
 };
 
 

@@ -2,8 +2,9 @@
 #define APPLICATION_H
 
 // User-created include
-#include "Utilities/FileSystem.h"
-#include "OpenLog.h"
+#include "Utilities/UTL_Files.h"
+#include "Utilities/UTL_Text.h"
+#include "OpenLog/OpenLog.h"
 
 #include "Log Target/LogManager.h"
 #include "Modules/Home.h"
@@ -42,7 +43,11 @@ public:
 	std::string printLogDirectory()		const	{ return LOG_DIRECTORY.string(); }
 	std::string printWindowTitle()		const	{ return WINDOW_TITLE; 				}
 
-	void	registerModule	(Module& module);
+	template <typename T>
+	void	registerModule(T& module) {
+		m_registeredModules.try_emplace(module.printName(), std::make_unique<T>(module));
+	}
+
 	Module* getModule		(const std::string name) const;
 	std::vector<std::string> getAllModuleNames() const;
 
@@ -55,6 +60,8 @@ public:
 	int 			m_window_y		{720};
 	ImGuiStyle* 	appStyle		{nullptr};
 
+	static const std::string LAS_TAG;						// Used for marking logs originating within LAS functions
+
 
 private:
 	Application();
@@ -63,7 +70,6 @@ private:
 	std::unordered_map<std::string, std::unique_ptr<Module>> m_registeredModules;							// Holds all Modules
 	LogManager m_LM					{ "LOG MANAGER" };
 	
-	const std::string LAS_TAG		{ "LAS" };						// Used for marking logs originating within LAS functions
 	const std::string VERSION		{ "v0.3.0-WIP" };
 	const std::string WINDOW_TITLE	{ "Life Application Suite" };
 

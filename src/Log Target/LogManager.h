@@ -1,8 +1,9 @@
 #pragma once
-#include "OpenLog.h"
-#include "../Utilities/FileSystem.h"
-#include "../Utilities/DateTime.h"
-#include "../Utilities/Utilities.h"
+
+#include "OpenLog/OpenLog.h"
+#include "Utilities/UTL_Files.h"
+#include "Utilities/UTL_DateTime.h"
+#include "Utilities/UTL_Text.h"
 
 #include <iostream>
 class LogManager : public OpenLog::LogTarget 

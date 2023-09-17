@@ -4,13 +4,13 @@ LogManager::LogManager(const std::string name) : OpenLog::LogTarget{ name } {
 
 }
 bool LogManager::LogEvent(const OpenLog::Log& log) {
-	std::cout << OpenLog::defaultFormatLog(log);
+	std::cout << OpenLog::printLog(log);
 
-	if (FileSystem::doesFileExist(m_logDirectory.string())) {
+	if (utl::fs::doesFileExist(m_logDirectory.string())) {
 		std::ofstream file;
 
 		file.open(m_instanceLogFile, std::ios_base::app);
-		file << OpenLog::defaultFormatLog(log);
+		file << OpenLog::printLog(log);
 		file.close();
 
 		if (file.fail()) {
@@ -24,7 +24,7 @@ bool LogManager::LogEvent(const OpenLog::Log& log) {
 }
 
 bool LogManager::setParentDirectory(const std::string path) {
-	if (FileSystem::doesFileExist(path)) {
+	if (utl::fs::doesFileExist(path)) {
 		m_logDirectory = path;
 		return true;
 	}
@@ -32,7 +32,7 @@ bool LogManager::setParentDirectory(const std::string path) {
 		return false;
 }
 bool LogManager::createLogFile() {
-	Timestamp now{};
+	utl::time::Timestamp now{};
 	now.stamp();
 
 	if (m_logDirectory.string() == "") {
@@ -40,12 +40,12 @@ bool LogManager::createLogFile() {
 	}
 	else {
 		std::string initialPath{ m_logDirectory.string() };
-		Utilities::ensureBackslash(initialPath);
+		utl::txt::ensureBackslash(initialPath);
 
 		std::ostringstream fullPath;
 		fullPath << initialPath << now.printNumericDateAndTimeNoSpaces() << ".log";
 
-		if (FileSystem::createFile(fullPath.str())) {
+		if (utl::fs::createFile(fullPath.str())) {
 			m_instanceLogFile = fullPath.str();
 			return true;
 		}

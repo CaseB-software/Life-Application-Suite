@@ -66,7 +66,7 @@ void MenuBar(bool &demoWindow){
 	if(ImGui::BeginMenu("Modules")){
 		// Iterate through module list and display the option
 		for(auto& name : Application::getInstance().getAllModuleNames()){
-			ImGui::MenuItem(name.c_str(), nullptr, Application::getInstance().getModule(name)->m_shown);
+			ImGui::MenuItem(name.c_str(), nullptr, &Application::getInstance().getModule(name)->m_shown);
 		}
 
 		ImGui::EndMenu();

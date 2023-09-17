@@ -2,7 +2,7 @@
 
 std::vector<Vehicle> VehicleManager::s_vehicleList{}; // Initializer for s_vehicleList to be used
 
-#pragma warning(disable : 4996). // For use of sprintf
+#pragma warning(disable : 4996) // For use of sprintf
 
 Application& app{ Application::getInstance() };
 
@@ -119,7 +119,7 @@ Vehicle::Vehicle(const std::string name, uint32_t mileage) {
 
 	return;
 }
-bool Vehicle::NewRepair(uint32_t setMiles, RepairType setType, double setCost, std::string setNotes, bool setThirdParty, Timestamp date) {
+bool Vehicle::NewRepair(uint32_t setMiles, RepairType setType, double setCost, std::string setNotes, bool setThirdParty, utl::time::Timestamp date) {
 
 	// State variables used for error checking
 	bool milesAccepted{ false }, costAccepted{ false }, notesAccepted{ false };
@@ -163,7 +163,7 @@ bool Vehicle::NewRepair(uint32_t setMiles, RepairType setType, double setCost, s
 	}
 
 }
-bool Vehicle::NewGasStop(uint32_t setMiles, double setGal, double setPPG, std::string setNotes, Timestamp date) {
+bool Vehicle::NewGasStop(uint32_t setMiles, double setGal, double setPPG, std::string setNotes, utl::time::Timestamp date) {
 	// Stae variables
 	bool milesAccepted{ false }, galAccepted{ false }, ppgAccepted{ false }, notesAccepted{ false };
 
@@ -228,7 +228,7 @@ bool Vehicle::setMileage(const uint32_t setMileage){
 
 	return success;
 }
-bool Vehicle::setLasUpdated(const Timestamp date){
+bool Vehicle::setLasUpdated(const utl::time::Timestamp date){
 	bool success{false};
 
 	if(date.getRawYMD().year() < m_lastUpdated.getRawYMD().year()) {
@@ -281,10 +281,7 @@ bool Vehicle::setName(const std::string setName){
 }
 
 
-// Vehicle Manager Implementation
 
-VehicleManager::VehicleManager() : Module("Vehicle Manager")		{ }
-VehicleManager::~VehicleManager()														{ }
 Vehicle* VehicleManager::SelectableVehicleList(bool &reset) {
 	static Vehicle* selVeh{nullptr};
 
@@ -452,7 +449,7 @@ bool VehicleManager::SaveAllVehicles	() {
 // Helper Functions
 
 std::string MakeVehicleName		(std::string& text){
-	//Check if the text string exists. If not, exit functin
+	//Check if the text string exists. If not, exit function
 	if (text == "") { return ""; }
 
 	std::string vehNameBuf{};
@@ -545,12 +542,12 @@ void 		MakeRepair			(std::string& text, Vehicle& veh){
 
 		// Parsing the text to the buffers. Needs to be in the order of however the file is written
 		// in order to write to the correct data types
-		FileSystem::readUntilAuto(currentString, separator, mileBuf);
-		typeBuf << FileSystem::readUntilString(currentString, separator);
-		FileSystem::readUntilAuto(currentString, separator, costBuf);
-		FileSystem::readUntilAuto(currentString, separator, thirdPartyBuf);
-		notesBuf << FileSystem::readUntilString(currentString, separator);
-		dateStringBuf << FileSystem::readUntilString(currentString, separator);
+		utl::txt::readUntilAuto(currentString, separator, mileBuf);
+		typeBuf << utl::txt::readUntilString(currentString, separator);
+		utl::txt::readUntilAuto(currentString, separator, costBuf);
+		utl::txt::readUntilAuto(currentString, separator, thirdPartyBuf);
+		notesBuf << utl::txt::readUntilString(currentString, separator);
+		dateStringBuf << utl::txt::readUntilString(currentString, separator);
 
 
 		// Make the typeBuf raw string into a RepairType enum for use
@@ -597,8 +594,8 @@ void 		MakeRepair			(std::string& text, Vehicle& veh){
 		}
 
 		// Read the dateStringBuf string and make a Timestamp type
-		Timestamp dateBuf{};
-		dateBuf.stamp(DateTimeHelper::stringToTimepoint(dateStringBuf.str()));
+		utl::time::Timestamp dateBuf{};
+		dateBuf.stamp(utl::time::stringToTimepoint(dateStringBuf.str()));
 
 		// Create the repair type
 		if(veh.NewRepair(mileBuf, enumTypeBuf, costBuf, notesBuf.str(), thirdPartyBuf, dateBuf)) { ++numRepSuccessfullyAddedToVehicle; }
@@ -647,15 +644,15 @@ void 		MakeGasStop			(std::string& text, Vehicle& veh){
 
 		// Parsing the text to the buffers. Needs to be in the order of however the file is written
 		// in order to write to the correct data types
-		FileSystem::readUntilAuto(currentString, separator, mileBuf);
-		FileSystem::readUntilAuto(currentString, separator, ppgBuf);
-		FileSystem::readUntilAuto(currentString, separator, gallonsBuf);
-		notesBuf << FileSystem::readUntilString(currentString, separator);
-		dateStringBuf << FileSystem::readUntilString(currentString, separator);
+		utl::txt::readUntilAuto(currentString, separator, mileBuf);
+		utl::txt::readUntilAuto(currentString, separator, ppgBuf);
+		utl::txt::readUntilAuto(currentString, separator, gallonsBuf);
+		notesBuf << utl::txt::readUntilString(currentString, separator);
+		dateStringBuf << utl::txt::readUntilString(currentString, separator);
 
 		// Read the dateStringBuf string and make a Timestamp type
-		Timestamp dateBuf{};
-		dateBuf.stamp(DateTimeHelper::stringToTimepoint(dateStringBuf.str()));
+		utl::time::Timestamp dateBuf{};
+		dateBuf.stamp(utl::time::stringToTimepoint(dateStringBuf.str()));
 
 		if(veh.NewGasStop(mileBuf, gallonsBuf, ppgBuf, notesBuf.str(), dateBuf)){ ++numGSSuccessfullyAddedToVehicle; }
 		else { ++numGSFailedToAddToVehicle; }
@@ -736,12 +733,12 @@ bool 		AddGasStop(Vehicle* veh, bool& wasSaved){
 		if(inputsAccepted){
 			// Inputs were accepted
 			if (!alreadySaved) {
-				Timestamp now; now.stamp();
+				utl::time::Timestamp now; now.stamp();
 				success = veh->NewGasStop(mileBuf, galBuf, ppgBuf, std::string{ notesBuf }, now); alreadySaved = true; 
 			}
 
 			// Reset Buffers
-			mileBuf = 0.0;
+			mileBuf = 0;
 			ppgBuf 	= 0.0;
 			galBuf 	= 0.0;
 			
@@ -840,11 +837,11 @@ bool 		AddRepair(Vehicle* veh, bool& wasSaved){
 	
 		if(inputsAccepted){
 			// Inputs were accepted
-			Timestamp now; now.stamp();
+			utl::time::Timestamp now; now.stamp();
 			if(!alreadySaved) { success = veh->NewRepair(mileBuf, static_cast<RepairType>(repairTypeIndex + 1), costBuf, std::string{notesBuf}, thirdPartyBuf, now); alreadySaved = true;} 
 
 			// Reset Buffers
-			mileBuf = 0.0;
+			mileBuf = 0;
 			costBuf = 0.0;
 			repairTypeIndex = 10;
 			
@@ -882,28 +879,54 @@ bool 		AddRepair(Vehicle* veh, bool& wasSaved){
 	return success;
 }
 
+
+VehicleManager::VehicleManager() : Module("Vehicle Manager") {
+
+}
+VehicleManager::~VehicleManager() {
+
+}
+bool VehicleManager::performFirstTimeSetup() {
+	return utl::fs::createDirectory(m_directory.string());
+}
 bool VehicleManager::init() {
 	// Go through the vehicle folder and store the names of the files
 	std::vector<std::string> vehicleFiles;
-	FileSystem::filesInDirectory(m_directory.string(), vehicleFiles);
 
+	if (utl::fs::doesFileExist(m_directory.string())) {
+		vehicleFiles = utl::fs::getFilesInDirectory(m_directory.string());
+	}
+	else {
+		if (!performFirstTimeSetup()) {
+			return false;
+		}
+		else {
+			return init();
+		}
+	}
+	
 	// Iterate through the files in the folder found and create Vehicle types
 	for (const std::string& fileName : vehicleFiles) {
 		std::ostringstream fileText;
 
 		//Opens file, reads text, outputs to fileText
-		if (!FileSystem::readFile(fileName, fileText)) {
+		if (!utl::fs::readFile(fileName, fileText)) {
 			// If vehicle file couldn't be opened to read, do nothing
 			// Unsuccessful open logged in readFile()
+			std::ostringstream msg;
+			msg << "Could not open [" << fileName << "] for reading.";
+			OpenLog::log(msg.str(), m_moduleTag);
 		}
 		else {
 			std::string vehInfoBuf{ fileText.str() };	//Stores the file text in string format
+
 			Vehicle vehicleBuffer{ MakeVehicleName(vehInfoBuf), MakeVehicleMiles(vehInfoBuf) };
 
 			MakeRepair(vehInfoBuf, vehicleBuffer);		//Make repairs from the remaining text and add to vehicle
 			MakeGasStop(vehInfoBuf, vehicleBuffer);		//Make Gas stop from the remaining text
 
 			addToVehicleList(vehicleBuffer);			//Add vehicleBuffer to the master vehicle list
+			
 		}
 	}
 
@@ -1135,7 +1158,7 @@ void VehicleManager::run() {
 								std::ostringstream newFileName{ m_directory.string() + nameBuf + ".dat"};  	// Renamed target vehicle file path
 
 								// If the Vehicle renaming was not accepted OR file name not valid, revert back to original name
-								if (!m_selectedVehicle->setName(nameBuf) || !FileSystem::renameFile(oldFileName.str(), newFileName.str())) {
+								if (!m_selectedVehicle->setName(nameBuf) || !utl::fs::renameFile(oldFileName.str(), newFileName.str())) {
 									ImGui::CloseCurrentPopup();
 									m_selectedVehicle->setName(oldName);
 									m_saveVehInfoFailed = true;
@@ -1330,12 +1353,12 @@ bool VehicleManager::SaveVehicle(Vehicle* veh) {
 		fileText << '\n';
 	}
 
-	return FileSystem::writeToFile(saveFileName.str(), fileText.str());
+	return utl::fs::overwriteFile(saveFileName.str(), fileText.str());
 }
 bool VehicleManager::DeleteVehicle(Vehicle& veh) {
 	delFromVehList(veh); // Delete from s_VehicleList
 
 	// Delete the actual file itself
 	std::string deletePath{ m_directory.string() + veh.getName() + ".dat" };
-	return FileSystem::deleteFile(deletePath);
+	return utl::fs::deleteFile(deletePath);
 }

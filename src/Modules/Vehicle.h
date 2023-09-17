@@ -1,8 +1,10 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
-#include "../Utilities/FileSystem.h"
-#include "../Utilities/DateTime.h"
+#include "Utilities/UTL_Files.h"
+#include "Utilities/UTL_DateTime.h"
+#include "OpenLog/OpenLog.h"
+
 #include "../Application.h"
 
 #include "Module.h"
@@ -13,7 +15,7 @@
 #include <chrono>
 
 #include <DearImGUI/imgui.h>
-#include <iostream>
+
 
 
 // Classification for the kind of Repair
@@ -43,7 +45,7 @@ public:
 	// \param setMileage Mileage the repair was done at \param setType The RepairType enum of the specific repair
 	// \param setNotes Any notes to add to the repair \param setThirdParty Was the repair done by another person (3rd Party) or done by the owner (1st Person)
 	// \param setDate The date the repair was done
-	Repair(uint32_t setMileage = 0, RepairType setType = RepairType::OTHER, double setCost = 0.00, std::string setNotes = "", bool setThirdParty = false, Timestamp date = std::chrono::system_clock::now())
+	Repair(uint32_t setMileage = 0, RepairType setType = RepairType::OTHER, double setCost = 0.00, std::string setNotes = "", bool setThirdParty = false, utl::time::Timestamp date = std::chrono::system_clock::now())
 		: m_mileageDone{ setMileage },
 		m_type{ setType },
 		m_cost{ setCost },
@@ -66,7 +68,8 @@ private:
 	std::string m_notes;
 	double 		m_cost;
 	bool 		m_isThirdPartyRepair;
-	Timestamp	m_date;
+
+	utl::time::Timestamp	m_date;
 
 };
 
@@ -76,7 +79,7 @@ public:
 	// Create a Gas Stop
 	// \param setMileage The mileage the gas stop was done \param setGallons Amount of gallons filled up with 
 	// \param setNotes Notes to add about the Gas Stop \param setDate Date of the Gas Stop
-	GasStop(uint32_t setMileage=0, double setGallons=0.0, double setPricePerGallon=0.0, std::string setNotes="", Timestamp date = std::chrono::system_clock::now())
+	GasStop(uint32_t setMileage=0, double setGallons=0.0, double setPricePerGallon=0.0, std::string setNotes="", utl::time::Timestamp date = std::chrono::system_clock::now())
 		: m_mileageDone{ setMileage },
 		m_gallons{setGallons},
 		m_pricePerGallon{setPricePerGallon},
@@ -98,7 +101,8 @@ private:
 	double		m_gallons;
 	double		m_pricePerGallon;
 	std::string m_notes;
-	Timestamp 		m_date;
+	
+	utl::time::Timestamp m_date;
 };
 
 // Track useful information about a Vehicle. Stores lists of Repairs and Gas Stops as well as mileage of the Vehicle
@@ -113,20 +117,20 @@ public:
 
 	uint32_t 				getMileage() 		const 	{ return m_mileage; }
 	std::string 			getName() 			const 	{ return m_name; }
-	Timestamp				getLastUpdated()	const 	{ return m_lastUpdated; }
+	utl::time::Timestamp	getLastUpdated()	const 	{ return m_lastUpdated; }
 
 	bool 					setName						(const std::string setName);
 	bool 					setMileage					(const uint32_t setMileage);
-	bool					setLasUpdated				(const Timestamp date);
+	bool					setLasUpdated				(const utl::time::Timestamp date);
 
 	std::vector<Repair>& 	getRepairList()	 			{ return repairList; } 
 	std::vector<GasStop>& 	getGasStopList() 			{ return gasList; }
 	
 
 	//Given individual types, it will error check ranges and data before adding to the vehicle's list of Repairs
-	bool NewRepair	(uint32_t setMiles, RepairType setType, double setCost, std::string setNotes, bool setThirdParty, Timestamp date);
+	bool NewRepair	(uint32_t setMiles, RepairType setType, double setCost, std::string setNotes, bool setThirdParty, utl::time::Timestamp date);
 	//Given individual types, it will error check ranges and data before adding to the vehicle's list of Gas Stops
-	bool NewGasStop	(uint32_t setMiles, double setGal, double setPPG, std::string setNotes, Timestamp date);
+	bool NewGasStop	(uint32_t setMiles, double setGal, double setPPG, std::string setNotes, utl::time::Timestamp date);
 
 	// Compare if Vehicle names are the same
 	friend bool operator==(const Vehicle& lhs, const Vehicle& rhs);	
@@ -134,20 +138,25 @@ public:
 private:
 	std::string m_name;
 	uint32_t	m_mileage;
-	Timestamp 	m_lastUpdated;
+	utl::time::Timestamp 	m_lastUpdated;
 
 	std::vector<Repair>		repairList{};
 	std::vector<GasStop>	gasList{};
 
 };
 
-class VehicleManager : public Module{
+
+
+
+
+class VehicleManager : public Module {
 public:
     VehicleManager();
     ~VehicleManager() override;
 
-    void    run()	override;
-    bool    init()  override;
+    void    run()					override;
+    bool    init()					override;
+	bool	performFirstTimeSetup() override;
 
 	// Functions for interacting with s_vehicleList
 	void 					addToVehicleList(Vehicle& veh) 		{ s_vehicleList.push_back(veh); 	std::cerr <<  "Added [" + veh.getName() +"] to vehicle list" << std::endl; } 	// Used to add A vehicle to the master list
