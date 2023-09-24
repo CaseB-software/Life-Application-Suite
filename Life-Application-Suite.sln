@@ -5,16 +5,42 @@ VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Life-Application-Suite", "Life-Application-Suite.vcxproj", "{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LAS-Module-API", "..\LAS-Module-API\LAS-Module-API.vcxproj", "{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LAS-Module-Test_Client", "..\LAS-Module-Test_Client\LAS-Module-Test_Client.vcxproj", "{F242069D-6280-4C67-A7C6-23321967A266}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Debug|x64.ActiveCfg = Debug|x64
 		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Debug|x64.Build.0 = Debug|x64
+		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Debug|x86.ActiveCfg = Debug|x64
+		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Debug|x86.Build.0 = Debug|x64
 		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Release|x64.ActiveCfg = Release|x64
 		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Release|x64.Build.0 = Release|x64
+		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Release|x86.ActiveCfg = Release|x64
+		{88A07A23-1A2A-4CBF-9689-D3FCE1F71E20}.Release|x86.Build.0 = Release|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Debug|x64.ActiveCfg = Debug|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Debug|x64.Build.0 = Debug|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Debug|x86.ActiveCfg = Debug|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Debug|x86.Build.0 = Debug|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Release|x64.ActiveCfg = Release|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Release|x64.Build.0 = Release|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Release|x86.ActiveCfg = Release|x64
+		{AF3F9812-CE1F-45BC-8219-8C03D52E8BCD}.Release|x86.Build.0 = Release|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Debug|x64.ActiveCfg = Debug|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Debug|x64.Build.0 = Debug|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Debug|x86.ActiveCfg = Debug|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Debug|x86.Build.0 = Debug|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Release|x64.ActiveCfg = Release|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Release|x64.Build.0 = Release|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Release|x86.ActiveCfg = Release|x64
+		{F242069D-6280-4C67-A7C6-23321967A266}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,12 +6,7 @@
 #include "Utilities/UTL_Text.h"
 #include "OpenLog/OpenLog.h"
 
-#include "Log Target/LogManager.h"
-#include "Modules/Home.h"
-
-#include "Modules/Module.h"
-#include "Modules/DebugLog.h"
-#include "Modules/Vehicle.h"
+#include "Log Manager/LogManager.h"
 
 // Standard library include
 #include <vector>
@@ -87,16 +82,24 @@ private:
 
 
 	// Setup functions. Does setup in the order listed here
-	bool SetupFileSystem();										// Set member path varialbes and initializes RST
-	bool SetupGLFW();											
-	bool SetupImGUI();											// Creates window flags and sets colors
-	bool SetupModules();										// Iterates through s_moduleList and runs the Setup() function
+	void setupOpenLog();
+	void setupFileSystem();										// Set member path varialbes and initializes RST
+	void setupGLFW();
+	void setupImGUI();											// Creates window flags and sets colors
+	void setupModules();										// Iterates through s_moduleList and runs the Setup() function
 	
 
 
 };
 
 std::string FirstTimeSetup(std::string oldDirectory); 					// Called if SetupFileSystem() could not find directories necessary, thereby assuming FirstTimeSetup
+
+
+// Creates the homepage for the application
+void Home();
+
+// Handles menu bar funcationality at the top of the window
+void MenuBar(bool& demoWindow);
 
 
 

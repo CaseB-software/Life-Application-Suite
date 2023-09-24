@@ -24,40 +24,27 @@ static void glfw_error_callback(int error, const char* description)
 
 void Application::init() {
 
-	OpenLog::Tag las{ LAS_TAG };
-	OpenLog::registerTag(las);
-	OpenLog::changeSettings(OpenLog::TIME_OFFSET, -7);
-	OpenLog::changeSettings(OpenLog::SHOW_LOCATION, false);
+	if (!m_initialized) {
+		try {
+			setupOpenLog();
+			setupFileSystem();
+			setupGLFW();
+			setupImGUI();
+			setupModules();
 
-	OpenLog::registerLogTarget(std::make_unique<LogManager>(m_LM));
-	OpenLog::addActiveLogTarget(m_LM.str());
+			m_initialized = true;
+		}
+		catch (OpenLog::Log log) {
+			OpenLog::log(log);
+		}
+	}
 
 	if (!m_initialized) {
-		// Ensure all proper subsystems are initialized
-		if (SetupFileSystem()) {
-
-			m_LM.setParentDirectory(LOG_DIRECTORY.string());
-			if (m_LM.createLogFile()) {
-				OpenLog::log("Created log file", LAS_TAG);
-			}
-
-			OpenLog::log("Application file system was setup successfully", LAS_TAG);
-
-
-			if (SetupGLFW()) {
-				OpenLog::log("GLFW was setup successfully", LAS_TAG);
-				if (SetupImGUI()) {
-					OpenLog::log("ImGUI was setup successfully", LAS_TAG);
-					if (SetupModules()) {
-						OpenLog::log("All Modules are setup", LAS_TAG);
-						m_initialized = true;
-						OpenLog::log("Application was successfully setup", LAS_TAG);
-					}
-				}
-			}
-		}
-	}	
+		throw std::exception("Application initialization failed.");
+		return;
+	}
 	
+
 	// Exit if every subsystem could noe be initialized
 	if(!m_initialized){
 		throw std::exception("Application initialization failed.");
@@ -143,8 +130,18 @@ std::vector<std::string> Application::getAllModuleNames() const{
 
 
 //-----PRIVATE-----
-bool Application::SetupFileSystem(){
-	bool success{false};
+void Application::setupOpenLog() {
+	OpenLog::Tag las{ LAS_TAG };
+	OpenLog::registerTag(las);
+	OpenLog::changeSettings(OpenLog::TIME_OFFSET, -7);
+	OpenLog::changeSettings(OpenLog::SHOW_LOCATION, false);
+
+	OpenLog::registerLogTarget(std::make_unique<LogManager>(m_LM));
+	OpenLog::addActiveLogTarget(m_LM.str());
+
+	// Log file is created in file system setup
+}
+void Application::setupFileSystem(){
 
 	AssignPaths(getExeParentPath());
 	
@@ -159,23 +156,21 @@ bool Application::SetupFileSystem(){
 	// Creates directories for the files if the files did exist/first time setup complete
 	if (!utl::fs::createDirectory(printParentDirectory()) || !utl::fs::createDirectory(printLogDirectory()) )
 	{
-		OpenLog::log("Could not initialize the file system.", LAS_TAG);
-		success = false;
+		throw OpenLog::Log{ "Could not initialize the file system.", LAS_TAG };
 	}
-	else 
-	{
-		success = true;
+	else {
+		// Create log file for this instance
+		m_LM.setParentDirectory(LOG_DIRECTORY.string());
+		if (m_LM.createLogFile()) {
+			OpenLog::log("Created log file", LAS_TAG);
+		}
 	}
-
-	return success;
 }
 
-bool Application::SetupGLFW(){
-	bool success {false};
-
+void Application::setupGLFW(){
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit()){
-		throw std::exception{ "GLFW could not be initialized" };
+		throw OpenLog::Log{ "GLFW could not be initialized" };
 	}
 	else{
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -185,19 +180,18 @@ bool Application::SetupGLFW(){
 
 		m_window = glfwCreateWindow(m_window_x, m_window_y, WINDOW_TITLE.c_str(), NULL, NULL);
 		if(!m_window){
-			throw std::exception{ "GLFW could not create window" };
+			throw OpenLog::Log{ "GLFW could not create window" };
 		}
 		else {
 			glfwMakeContextCurrent(m_window);
 			glfwSetWindowSizeLimits(m_window, MIN_WIN_SIZE.x, MIN_WIN_SIZE.y, GLFW_DONT_CARE, GLFW_DONT_CARE);
 			gladLoadGL(); 
 			glfwSwapInterval(m_vsync); // Enable vsync
-			success = true;
+			return;
 		}
 	}
-	return success;
 }
-bool Application::SetupImGUI(){
+void Application::setupImGUI(){
 	const char* glsl_version = "#version 460";
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -238,22 +232,15 @@ bool Application::SetupImGUI(){
 		appStyle->Colors[ImGuiCol_Tab] 					= ImColor(60, 60, 60, 255);
 		appStyle->TabRounding = 0.0f;
 	}
-
-	return true;
 }
-bool Application::SetupModules(){
-
-	VehicleManager 	vehicleManager 	{};
-	vehicleManager.setDirectory(MODULE_DIRECTORY.string());
-
+void Application::setupModules(){
 	// The order of calling AddModule() will determine the order they are in the menu bar
-	registerModule(vehicleManager);
 
 	// If there are no modules, exit
 	if(m_registeredModules.empty())
 	{
 		OpenLog::Log("There are no Modules for this application", LAS_TAG);
-		return false;
+		return;
 	}
 
 	// Iterate through the module list and run the setup function
@@ -267,8 +254,6 @@ bool Application::SetupModules(){
 			OpenLog::log( "Successfully initialized Module " + module->printName(), LAS_TAG);
 		}
 	}
-
-	return true;
 }
 
 
@@ -405,5 +390,83 @@ std::string FirstTimeSetup(std::string oldDirectory) {
 	return desiredDirectoryBuffer;
 }
 
+
+void Home()
+{
+	// Intent to remove in release ---------
+	static bool showDemoWindow = false;
+	// -------------------------------------
+
+	// Create Docking Window over full viewport----------------------------------------
+	static ImGuiIO& io = ImGui::GetIO();
+	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+		static const ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+
+		static ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoScrollbar;
+
+
+		if (ImGui::Begin("Main Dockspace", nullptr, window_flags)) {
+			static ImGuiID dockspace_id;
+			dockspace_id = ImGui::GetID("MainDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+
+			// The difference in the call to BeginMenuBar() here comapred to the else statement's BeginMainMenuBar() is
+			// that the dockspace occludes the MainMenuBar since the dockspace is itself a window
+			if (ImGui::BeginMenuBar()) {
+				MenuBar(showDemoWindow);
+				ImGui::EndMenuBar();
+			}
+			ImGui::End();
+		}
+	} // -----------------------------------------------------------
+
+
+	// No Docking else statement
+	else {
+		if (ImGui::BeginMainMenuBar()) {
+			MenuBar(showDemoWindow);
+			ImGui::EndMainMenuBar();
+		}
+	}
+
+
+	// Show all modules in the module list and actually draw the window
+	for (std::string name : Application::getInstance().getAllModuleNames()) {
+		Module* module{ Application::getInstance().getModule(name) };
+		if (module->m_shown) {
+			module->run();
+		}
+	}
+
+	// Intent to remove in release ---------
+	if (showDemoWindow) { ImGui::ShowDemoWindow(); }
+	// -------------------------------------
+
+	return;
+}
+
+void MenuBar(bool& demoWindow) {
+	// Creates Dropdown item in the menu bar labeled "Modules"
+	if (ImGui::BeginMenu("Modules")) {
+		// Iterate through module list and display the option
+		for (auto& name : Application::getInstance().getAllModuleNames()) {
+			ImGui::MenuItem(name.c_str(), nullptr, &Application::getInstance().getModule(name)->m_shown);
+		}
+
+		ImGui::EndMenu();
+	}
+
+	// Creates Dropdown item in the menu bar labeled "View"
+	if (ImGui::BeginMenu("View")) {
+		ImGui::MenuItem("Demo Window", nullptr, &demoWindow);
+		ImGui::EndMenu();
+	}
+}
 
 
