@@ -154,7 +154,7 @@ void Application::setupFileSystem(){
 	
 
 	// Creates directories for the files if the files did exist/first time setup complete
-	if (!utl::fs::createDirectory(printParentDirectory()) || !utl::fs::createDirectory(printLogDirectory()) )
+	if (!utl::fs::createDirectory(printParentDirectory()) || !utl::fs::createDirectory(printLogDirectory()) || !utl::fs::createDirectory(printModuleDirectory()))
 	{
 		throw OpenLog::Log{ "Could not initialize the file system.", LAS_TAG };
 	}
@@ -234,7 +234,56 @@ void Application::setupImGUI(){
 	}
 }
 void Application::setupModules(){
-	// The order of calling AddModule() will determine the order they are in the menu bar
+
+
+	std::vector<std::string> files{ utl::fs::getFilesInDirectory(printModuleDirectory()) };
+
+	std::vector<std::filesystem::path> dllFiles;
+	if (files.empty()) {
+		OpenLog::log("No modules were found in [" + printModuleDirectory() + "]", LAS_TAG);
+	}
+	else {
+		for (const std::string& s : files) {
+			if (s.find(".dll") != std::string::npos) {
+				OpenLog::log("Found module [" + s + "]", LAS_TAG);
+				dllFiles.push_back(s);
+			}
+			else {
+				OpenLog::log("Loading modules disregarded file [" + s + "]", LAS_TAG);
+			}
+		}
+	}
+
+	
+
+	for (const auto& dllFile : dllFiles) {
+		if (dllFile != "") {
+			HINSTANCE handle;
+			handle = LoadLibrary(dllFile.c_str());
+
+			typedef LAS::Module*(*moduleType)();
+			moduleType module;
+
+			if (handle) {
+				module = (moduleType)GetProcAddress(handle, "getModule");
+
+				if (module) {
+					OpenLog::log(module()->printName(), LAS_TAG);
+					std::cout << module()->init() << std::endl;
+				}
+				else {
+					OpenLog::log("Couldn't load module", LAS_TAG);
+				}
+				FreeLibrary(handle);
+			}
+		}
+		else {
+			OpenLog::log("Failed loading dll [" + dllFile.string() + "]");
+		}
+	}
+
+
+	
 
 	// If there are no modules, exit
 	if(m_registeredModules.empty())

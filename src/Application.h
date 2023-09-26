@@ -5,8 +5,10 @@
 #include "Utilities/UTL_Files.h"
 #include "Utilities/UTL_Text.h"
 #include "OpenLog/OpenLog.h"
+#include "LAS-Module-API.h"
 
 #include "Log Manager/LogManager.h"
+
 
 // Standard library include
 #include <vector>
@@ -20,7 +22,9 @@
 #include <DearImGUI/imgui.h>
 #include <DearImGUI/imgui_impl_glfw.h>
 #include <DearImGUI/imgui_impl_opengl3.h>
+#include <Windows.h>
 
+using namespace LAS;
 
 class Application final
 {
@@ -30,7 +34,6 @@ public:
 	
 	void init();		// Goes through all Setup member functions
 	void run();			// Contians main loop
-
 
 	// Get functions
 	std::string printParentDirectory()	const	{ return PARENT_DIRECTORY.string(); }
@@ -46,8 +49,6 @@ public:
 	Module* getModule		(const std::string name) const;
 	std::vector<std::string> getAllModuleNames() const;
 
-
-
 	// Window variables
 	const ImVec2 	MIN_WIN_SIZE	{1280, 720};
 	GLFWwindow* 	m_window 		{nullptr};
@@ -56,7 +57,6 @@ public:
 	ImGuiStyle* 	appStyle		{nullptr};
 
 	static const std::string LAS_TAG;						// Used for marking logs originating within LAS functions
-
 
 private:
 	Application();
@@ -94,12 +94,8 @@ private:
 
 std::string FirstTimeSetup(std::string oldDirectory); 					// Called if SetupFileSystem() could not find directories necessary, thereby assuming FirstTimeSetup
 
-
-// Creates the homepage for the application
-void Home();
-
-// Handles menu bar funcationality at the top of the window
-void MenuBar(bool& demoWindow);
+void Home();					// Creates the homepage for the application
+void MenuBar(bool& demoWindow);	// Handles menu bar funcationality at the top of the window
 
 
 
