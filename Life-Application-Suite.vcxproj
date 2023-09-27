@@ -106,6 +106,7 @@
     <Library Include="lib\Utilities-Release-v1.1.0.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Module Interface\ModuleInterface.cpp" />
     <ClCompile Include="src\Log Manager\LogManager.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\_MAIN.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="include\Utilities\UTL_LAS.h" />
     <ClInclude Include="include\Utilities\UTL_Settings.h" />
     <ClInclude Include="include\Utilities\UTL_Text.h" />
+    <ClInclude Include="src\Module Interface\ModuleInterface.h" />
     <ClInclude Include="src\Utilities\Utilities.h" />
     <ClInclude Include="include\OpenLog.h" />
     <ClInclude Include="src\Log Manager\LogManager.h" />

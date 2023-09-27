@@ -106,10 +106,9 @@ void Application::run()
 	return;
 }
 
-
-Module* Application::getModule(const std::string name) const {
+LAS::Module* Application::getModule(const std::string& name) const {
 	if (m_registeredModules.contains(name)) {
-		return m_registeredModules.at(name).get();
+		return &m_registeredModules.at(name).get()->getModule();
 	}
 	else
 		return nullptr;
@@ -119,7 +118,7 @@ std::vector<std::string> Application::getAllModuleNames() const{
 	std::vector<std::string> returnBuf;
 
 	for (auto& module : m_registeredModules) {
-		returnBuf.push_back(module.second->printName());
+		returnBuf.push_back(module.second->getModule().printName());
 	}
 
 	return returnBuf;
@@ -235,9 +234,8 @@ void Application::setupImGUI(){
 }
 void Application::setupModules(){
 
-
+	// Iterate through file folder and add Dlls to dllFiles vector
 	std::vector<std::string> files{ utl::fs::getFilesInDirectory(printModuleDirectory()) };
-
 	std::vector<std::filesystem::path> dllFiles;
 	if (files.empty()) {
 		OpenLog::log("No modules were found in [" + printModuleDirectory() + "]", LAS_TAG);
@@ -245,7 +243,6 @@ void Application::setupModules(){
 	else {
 		for (const std::string& s : files) {
 			if (s.find(".dll") != std::string::npos) {
-				OpenLog::log("Found module [" + s + "]", LAS_TAG);
 				dllFiles.push_back(s);
 			}
 			else {
@@ -255,31 +252,24 @@ void Application::setupModules(){
 	}
 
 	
+	// Move each Dll into a ModuleInterface
+	for (const auto& dllFile : dllFiles) {			
+		std::unique_ptr<ModuleInterface> IModule{ new ModuleInterface{} };
 
-	for (const auto& dllFile : dllFiles) {
-		if (dllFile != "") {
-			HINSTANCE handle;
-			handle = LoadLibrary(dllFile.c_str());
+		if (IModule->loadDLL(dllFile)) {
+			if (IModule->loadModule()) {
 
-			typedef LAS::Module*(*moduleType)();
-			moduleType module;
-
-			if (handle) {
-				module = (moduleType)GetProcAddress(handle, "getModule");
-
-				if (module) {
-					OpenLog::log(module()->printName(), LAS_TAG);
-					std::cout << module()->init() << std::endl;
-				}
-				else {
-					OpenLog::log("Couldn't load module", LAS_TAG);
-				}
-				FreeLibrary(handle);
+				m_registeredModules.try_emplace(IModule->getModule().printName(), std::move(IModule));
+				OpenLog::log("Successfully loaded Module [" + dllFile.string() + "]", LAS_TAG);
+			}
+			else {
+				OpenLog::log("Failed loading Module from [" + dllFile.string() + "]", LAS_TAG);
 			}
 		}
 		else {
-			OpenLog::log("Failed loading dll [" + dllFile.string() + "]");
+			OpenLog::log("Failed loading DLL from [" + dllFile.string() + "]", LAS_TAG);
 		}
+
 	}
 
 
@@ -294,13 +284,13 @@ void Application::setupModules(){
 
 	// Iterate through the module list and run the setup function
 	for(auto& pair : m_registeredModules){
-		Module* module{ pair.second.get()};
-		if(!module->init()){
-			std::string msg{"Could not setup [" + module->printName() + "]. It was not added to the active module list"};
+		LAS::Module& module{ pair.second.get()->getModule()};
+		if(!module.init()){
+			std::string msg{"Could not setup [" + module.printName() + "]. It was not added to the active module list"};
 			OpenLog::log(msg, LAS_TAG);
 		}
 		else { 
-			OpenLog::log( "Successfully initialized Module " + module->printName(), LAS_TAG);
+			OpenLog::log( "Successfully initialized Module " + module.printName(), LAS_TAG);
 		}
 	}
 }

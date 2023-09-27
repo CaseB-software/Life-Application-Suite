@@ -49,9 +49,9 @@ namespace LAS {
         virtual bool performFirstTimeSetup();
         virtual bool init();
         virtual void run();
+        virtual void shutdown();
 
         bool m_shown{ false };
-
 
     protected:
         std::string m_name;

@@ -6,6 +6,7 @@
 #include "Utilities/UTL_Text.h"
 #include "OpenLog/OpenLog.h"
 #include "LAS-Module-API.h"
+#include "Module Interface/ModuleInterface.h"
 
 #include "Log Manager/LogManager.h"
 
@@ -38,15 +39,10 @@ public:
 	// Get functions
 	std::string printParentDirectory()	const	{ return PARENT_DIRECTORY.string(); }
 	std::string printModuleDirectory()	const	{ return MODULE_DIRECTORY.string(); }
-	std::string printLogDirectory()		const	{ return LOG_DIRECTORY.string(); }
+	std::string printLogDirectory()		const	{ return LOG_DIRECTORY.string();	}
 	std::string printWindowTitle()		const	{ return WINDOW_TITLE; 				}
 
-	template <typename T>
-	void	registerModule(T& module) {
-		m_registeredModules.try_emplace(module.printName(), std::make_unique<T>(module));
-	}
-
-	Module* getModule		(const std::string name) const;
+	LAS::Module* getModule	(const std::string& name) const;
 	std::vector<std::string> getAllModuleNames() const;
 
 	// Window variables
@@ -56,13 +52,16 @@ public:
 	int 			m_window_y		{720};
 	ImGuiStyle* 	appStyle		{nullptr};
 
-	static const std::string LAS_TAG;						// Used for marking logs originating within LAS functions
+	static const std::string LAS_TAG;							// Used for marking logs originating within LAS functions
+
+
 
 private:
 	Application();
 	const Application& operator=(const Application& app) = delete;
 
-	std::unordered_map<std::string, std::unique_ptr<Module>> m_registeredModules;							// Holds all Modules
+	std::unordered_map<std::string, std::unique_ptr<ModuleInterface>> m_registeredModules{};		// Holds all Modules
+
 	LogManager m_LM					{ "LOG MANAGER" };
 	
 	const std::string VERSION		{ "v0.3.0-WIP" };
@@ -76,7 +75,7 @@ private:
 	std::string getExeParentPath() const;						// Returns the parent directory of the EXE path
 	void 		AssignPaths(const std::string parentPath);		// Assigns member variable paths given the parentPath
 	
-	std::filesystem::path 	PARENT_DIRECTORY;						// Main parent directory that houses the executable
+	std::filesystem::path 	PARENT_DIRECTORY;					// Main parent directory that houses the executable
 	std::filesystem::path	MODULE_DIRECTORY;
 	std::filesystem::path	LOG_DIRECTORY;
 
@@ -86,13 +85,13 @@ private:
 	void setupFileSystem();										// Set member path varialbes and initializes RST
 	void setupGLFW();
 	void setupImGUI();											// Creates window flags and sets colors
-	void setupModules();										// Iterates through s_moduleList and runs the Setup() function
+	void setupModules();										// Finds and loads DLLs and registers accepted modules
 	
 
 
 };
 
-std::string FirstTimeSetup(std::string oldDirectory); 					// Called if SetupFileSystem() could not find directories necessary, thereby assuming FirstTimeSetup
+std::string FirstTimeSetup(std::string oldDirectory); 			// Called if SetupFileSystem() could not find directories necessary, thereby assuming FirstTimeSetup
 
 void Home();					// Creates the homepage for the application
 void MenuBar(bool& demoWindow);	// Handles menu bar funcationality at the top of the window
