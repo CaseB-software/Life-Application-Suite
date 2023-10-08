@@ -55,14 +55,24 @@ namespace OpenLog {
                 const std::source_location location=std::source_location::current(), 
                 const std::chrono::time_point<std::chrono::system_clock> timestamp=std::chrono::system_clock::now()
         );
+        Log(Log&& other);
         virtual ~Log() = default;
+
+        Log& operator=(Log&& other);
+
+
+        const std::string_view                                      msg()       const;
+        const std::source_location&                                 location()  const;
+        const std::chrono::time_point<std::chrono::system_clock>&   timestamp() const;
+        const std::vector<std::string>&                             tags()      const;
 
         bool addTag(const std::string& tag);
 
-        const std::string 											m_msg;
-        const std::source_location									m_location;
-        const std::chrono::time_point<std::chrono::system_clock> 	m_timestamp;
-              std::vector<std::string>                              m_tags;
+    private:
+        std::string 										m_msg;
+        std::source_location								m_location;
+        std::chrono::time_point<std::chrono::system_clock> 	m_timestamp;
+        std::vector<std::string>                            m_tags;
     };
 
     bool log                 (const Log& log);

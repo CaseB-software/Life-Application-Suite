@@ -34,7 +34,7 @@ void Application::init() {
 
 			m_initialized = true;
 		}
-		catch (OpenLog::Log log) {
+		catch (OpenLog::Log& log) {
 			OpenLog::log(log);
 		}
 	}
@@ -106,7 +106,7 @@ void Application::run()
 	return;
 }
 
-LAS::Module* Application::getModule(const std::string& name) const {
+LAS::IModule* Application::getModule(const std::string& name) const {
 	if (m_registeredModules.contains(name)) {
 		return &m_registeredModules.at(name).get()->getModule();
 	}
@@ -135,8 +135,8 @@ void Application::setupOpenLog() {
 	OpenLog::changeSettings(OpenLog::TIME_OFFSET, -7);
 	OpenLog::changeSettings(OpenLog::SHOW_LOCATION, false);
 
-	OpenLog::registerLogTarget(std::make_unique<LogManager>(m_LM));
-	OpenLog::addActiveLogTarget(m_LM.str());
+	OpenLog::registerLogTarget(std::make_unique<LogManager>(m_logManager));
+	OpenLog::addActiveLogTarget(m_logManager.str());
 
 	// Log file is created in file system setup
 }
@@ -159,8 +159,8 @@ void Application::setupFileSystem(){
 	}
 	else {
 		// Create log file for this instance
-		m_LM.setParentDirectory(LOG_DIRECTORY.string());
-		if (m_LM.createLogFile()) {
+		m_logManager.setParentDirectory(LOG_DIRECTORY.string());
+		if (m_logManager.createLogFile()) {
 			OpenLog::log("Created log file", LAS_TAG);
 		}
 	}
@@ -254,11 +254,11 @@ void Application::setupModules(){
 	
 	// Move each Dll into a ModuleInterface
 	for (const auto& dllFile : dllFiles) {			
-		std::unique_ptr<ModuleInterface> IModule{ new ModuleInterface{} };
+		std::unique_ptr<IModuleDLL> IModule{ new IModuleDLL{} };
 
 		if (IModule->loadDLL(dllFile)) {
 			if (IModule->loadModule()) {
-
+				IModule->getModule().setDirectory(printModuleDirectory());
 				m_registeredModules.try_emplace(IModule->getModule().printName(), std::move(IModule));
 				OpenLog::log("Successfully loaded Module [" + dllFile.string() + "]", LAS_TAG);
 			}
@@ -284,7 +284,7 @@ void Application::setupModules(){
 
 	// Iterate through the module list and run the setup function
 	for(auto& pair : m_registeredModules){
-		LAS::Module& module{ pair.second.get()->getModule()};
+		LAS::IModule& module{ pair.second.get()->getModule()};
 		if(!module.init()){
 			std::string msg{"Could not setup [" + module.printName() + "]. It was not added to the active module list"};
 			OpenLog::log(msg, LAS_TAG);
@@ -477,9 +477,9 @@ void Home()
 
 	// Show all modules in the module list and actually draw the window
 	for (std::string name : Application::getInstance().getAllModuleNames()) {
-		Module* module{ Application::getInstance().getModule(name) };
-		if (module->m_shown) {
-			module->run();
+		LAS::IModule& module{ *Application::getInstance().getModule(name) };
+		if (module.m_shown) {
+			module.run();
 		}
 	}
 

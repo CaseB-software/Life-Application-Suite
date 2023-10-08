@@ -6,24 +6,24 @@
 #include <memory>
 
 
-class ModuleInterface
+class IModuleDLL
 {
 public:
-	ModuleInterface();
-	~ModuleInterface();
+	IModuleDLL();
+	~IModuleDLL();
 
-	ModuleInterface(ModuleInterface&& other);
-	ModuleInterface& operator=(ModuleInterface&& old) noexcept;
+	IModuleDLL(IModuleDLL&& other);
+	IModuleDLL& operator=(IModuleDLL&& old) noexcept;
 
 	bool loadDLL(const std::wstring& path);
 	bool loadModule();
 
-	LAS::Module& getModule();
+	LAS::IModule& getModule();
 
 private:
 	HINSTANCE m_dllHandle;
 
-	LAS::Module* m_module{nullptr};
+	LAS::IModule* m_module{nullptr};
 
 
 };

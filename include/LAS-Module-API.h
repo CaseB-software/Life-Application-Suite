@@ -24,10 +24,10 @@
 #endif
 
 namespace LAS {
-    class ChildWindow {
+    class IChildWindow {
     public:
-        ChildWindow(const std::string title = "New Child Window", const ImVec2 minWinSize = ImVec2(200, 200), const ImVec2 maxWinSize = ImVec2(500, 500));
-        ~ChildWindow();
+        IChildWindow(const std::string title = "New Child Window", const ImVec2 minWinSize = ImVec2(200, 200), const ImVec2 maxWinSize = ImVec2(500, 500));
+        virtual ~IChildWindow() = 0;
 
         std::string m_title;
 
@@ -38,18 +38,20 @@ namespace LAS {
     };
 
 
-    class Module {
+    class IModule {
     public:
-        Module(const std::string setName = "New Module", const std::string& parentDirectory = "");
-        virtual ~Module();
+        IModule(const std::string setName = "New Module", const std::string& parentDirectory = "");
+        virtual ~IModule() = 0;
 
         std::string printName()         const { return m_name; }
         std::string printDirectory()    const { return m_directory.string(); }
 
-        virtual bool performFirstTimeSetup();
-        virtual bool init();
-        virtual void run();
-        virtual void shutdown();
+        bool setDirectory(const std::string& parentPath);
+
+        virtual bool performFirstTimeSetup() = 0;
+        virtual bool init()                  = 0;
+        virtual void run()                   = 0;
+        virtual void shutdown()              = 0;
 
         bool m_shown{ false };
 
@@ -58,9 +60,7 @@ namespace LAS {
         std::string m_moduleTag;
 
 
-
     private:
-        bool setDirectory(const std::string& parentPath);
         std::filesystem::path m_directory{};
 
         //  std::unordered_map<std::string, ChildWindow> m_childWindows;
@@ -70,7 +70,7 @@ namespace LAS {
 
     // Exported Functions
     extern "C" {
-        LAS_API Module* getModule();
+        LAS_API IModule* getModule();
     }
 
 }

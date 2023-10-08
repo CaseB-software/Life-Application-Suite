@@ -8,7 +8,7 @@
 #include "LAS-Module-API.h"
 #include "Module Interface/ModuleInterface.h"
 
-#include "Log Manager/LogManager.h"
+#include "Default Modules/Log Manager/LogManager.h"
 
 
 // Standard library include
@@ -42,7 +42,7 @@ public:
 	std::string printLogDirectory()		const	{ return LOG_DIRECTORY.string();	}
 	std::string printWindowTitle()		const	{ return WINDOW_TITLE; 				}
 
-	LAS::Module* getModule	(const std::string& name) const;
+	LAS::IModule* getModule	(const std::string& name) const;				// Returns t
 	std::vector<std::string> getAllModuleNames() const;
 
 	// Window variables
@@ -60,9 +60,9 @@ private:
 	Application();
 	const Application& operator=(const Application& app) = delete;
 
-	std::unordered_map<std::string, std::unique_ptr<ModuleInterface>> m_registeredModules{};		// Holds all Modules
+	std::unordered_map<std::string, std::unique_ptr<IModuleDLL>> m_registeredModules{};		// Holds all Modules
 
-	LogManager m_LM					{ "LOG MANAGER" };
+	LogManager m_logManager			{ "LOG MANAGER" };
 	
 	const std::string VERSION		{ "v0.3.0-WIP" };
 	const std::string WINDOW_TITLE	{ "Life Application Suite" };
@@ -87,8 +87,6 @@ private:
 	void setupImGUI();											// Creates window flags and sets colors
 	void setupModules();										// Finds and loads DLLs and registers accepted modules
 	
-
-
 };
 
 std::string FirstTimeSetup(std::string oldDirectory); 			// Called if SetupFileSystem() could not find directories necessary, thereby assuming FirstTimeSetup

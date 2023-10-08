@@ -1,19 +1,19 @@
 #include "ModuleInterface.h"
 
 
-ModuleInterface::ModuleInterface() {
+IModuleDLL::IModuleDLL() {
 
 }
-ModuleInterface::~ModuleInterface() {
+IModuleDLL::~IModuleDLL() {
 	delete m_module;
 }
 
-ModuleInterface::ModuleInterface(ModuleInterface&& other) {
+IModuleDLL::IModuleDLL(IModuleDLL&& other) {
 	m_module = std::move(other.m_module);
 	m_dllHandle = other.m_dllHandle;
 	
 }
-ModuleInterface& ModuleInterface::operator=(ModuleInterface&& old) noexcept {
+IModuleDLL& IModuleDLL::operator=(IModuleDLL&& old) noexcept {
 	if (this != &old) {
 		m_module = std::move(old.m_module);
 		m_dllHandle = old.m_dllHandle;
@@ -23,7 +23,7 @@ ModuleInterface& ModuleInterface::operator=(ModuleInterface&& old) noexcept {
 }
 
 
-bool ModuleInterface::loadDLL(const std::wstring& path) {
+bool IModuleDLL::loadDLL(const std::wstring& path) {
 	if (std::filesystem::exists(path)) {
 		m_dllHandle = LoadLibrary(path.c_str());
 		return (m_dllHandle);
@@ -31,14 +31,14 @@ bool ModuleInterface::loadDLL(const std::wstring& path) {
 	else
 		return false;
 }
-bool ModuleInterface::loadModule() {
-	typedef LAS::Module* (*getModuleType)();
+bool IModuleDLL::loadModule() {
+	typedef LAS::IModule* (*getModuleType)();
 	getModuleType getModule;
 	getModule = (getModuleType)GetProcAddress(m_dllHandle, "getModule");
 	m_module = getModule();
 
 	return m_module;
 }
-LAS::Module& ModuleInterface::getModule() {
+LAS::IModule& IModuleDLL::getModule() {
 	return *m_module;
 }
