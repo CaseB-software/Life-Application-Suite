@@ -106,11 +106,12 @@
     <Library Include="lib\Utilities-Release-v1.1.0.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ModuleHandler.cpp" />
     <ClCompile Include="src\Default Modules\Settings\Settings.cpp" />
     <ClCompile Include="src\Module Interface\ModuleInterface.cpp" />
     <ClCompile Include="src\Default Modules\Log Manager\LogManager.cpp" />
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\_MAIN.cpp" />
+    <ClCompile Include="src\Entry.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DearImGUI\imconfig.h" />
@@ -135,6 +136,7 @@
     <ClInclude Include="include\Utilities\UTL_LAS.h" />
     <ClInclude Include="include\Utilities\UTL_Settings.h" />
     <ClInclude Include="include\Utilities\UTL_Text.h" />
+    <ClInclude Include="src\ModuleHandler.h" />
     <ClInclude Include="src\Default Modules\Settings\Settings.h" />
     <ClInclude Include="src\Module Interface\ModuleInterface.h" />
     <ClInclude Include="src\Utilities\Utilities.h" />
